@@ -14,7 +14,7 @@ var client = '';
 fs.readFile('creds.json', 'utf-8', function (err, data) {
     if (err) throw err;
     creds = JSON.parse(data);
-    client = redis.createClient('redis://' + creds.user + ':' + creds.password + '@' + creds.host + ':' + creds.port);
+    client = redis.createClient('redis://' + creds.host + ':' + creds.port);
 
     // Redis Client Ready
     client.once('ready', function () {
@@ -30,7 +30,7 @@ fs.readFile('creds.json', 'utf-8', function (err, data) {
         });
 
         // Initialize Messages
-        client.get('chat_app_messages', function (err, reply) {
+        client.get('UploadNotification', function (err, reply) {
             if (reply) {
                 chat_messages = JSON.parse(reply);
             }
@@ -93,13 +93,9 @@ app.post('/leave', function (req, res) {
 
 // API - Send + Store Message
 app.post('/send_message', function (req, res) {
-    var username = req.body.username;
     var message = req.body.message;
-    chat_messages.push({
-        'sender': username,
-        'message': message
-    });
-    client.set('chat_app_messages', JSON.stringify(chat_messages));
+    chat_messages.push(message);
+    client.set('UploadNotification', JSON.stringify(chat_messages));
     res.send({
         'status': 'OK'
     });
